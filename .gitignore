@@ -1,0 +1,13 @@
+# Repo 관리 정보
+/.repo/
+
+# 외부 소스는 제외하고 자체 레이어만 추적
+/sources/*
+
+/edf-init-build-env
+
+# 빌드 산출물과 캐시
+/build/**
+!/build/conf**
+/downloads/
+/sstate-cache/
