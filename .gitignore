@@ -9,5 +9,10 @@
 # 빌드 산출물과 캐시
 /build/**
 !/build/conf**
+/build/conf/conf-summary.txt
+
 /downloads/
 /sstate-cache/
+
+# VS code 관련 파일
+/.vscode/

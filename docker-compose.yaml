@@ -1,0 +1,28 @@
+x-edf-common: &edf-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  working_dir: ${PWD}
+  volumes:
+    - ${PWD}/build:${PWD}/build
+    - ${PWD}/sources:${PWD}/sources
+
+services:
+  edf-linux_dev:
+    <<: *edf-common
+    container_name: edf-linux_dev
+    stdin_open: true
+    tty: true
+    environment:
+      PROJECT_ROOT: ${PWD}
+
+  edf-linux_build:
+    <<: *edf-common
+    profiles: [build]
+    environment:
+      BITBAKE_TARGET: ${BITBAKE_TARGET:-edf-linux-disk-image-kria}
+    command:
+      - /bin/bash
+      - -c
+      - |
+        source ./sources/poky/oe-init-build-env build && exec bitbake "$${BITBAKE_TARGET}"
