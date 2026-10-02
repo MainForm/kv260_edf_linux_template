@@ -1,0 +1,3 @@
+[submodule "sources/meta-kv260"]
+	path = sources/meta-kv260
+	url = https://github.com/MainForm/meta-kv260_tempalte.git

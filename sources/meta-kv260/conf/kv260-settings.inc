@@ -1,1 +1,0 @@
-KV260_MACHINE_NAME="zynqmp-kv260-sdt-full"
