@@ -11,7 +11,9 @@ fi
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 LAYER_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
-MACHINE_NAME="zynqmp-kv260-sdt-full"
+
+source "${LAYER_DIR}/conf/kv260-settings.inc"
+MACHINE_NAME="${KV260_MACHINE_NAME}"
 SDT_DIR="${LAYER_DIR}/hw/sdt"
 # Separate from the previous template-based configuration cache.
 WORK_DIR="${BUILDDIR}/gen-machine/${MACHINE_NAME}-no-template"

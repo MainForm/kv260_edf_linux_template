@@ -13,6 +13,7 @@ AMD EDF(Embedded Developement Framewoark) 2026.01 버전을 기반으로 개발�
 meta-kv260/
 ├── conf/
 │   ├── layer.conf
+|   ├── kv260-settings.inc
 |   |   -------------------- gen-machine-conf로 생성된 파일들 ---------------------
 │   ├── machine/                    # 생성된 머신 설정과 include 파일
 │   ├── multiconfig/                # 생성된 FSBL, PMU 펌웨어 빌드 설정
@@ -52,6 +53,11 @@ meta-kv260/
     ```
 
 <br>
+
+## KV260 설정
+### 1. KV260_MACHINE_NAME
+Yocto에서 사용할 MACHINE의 이름을 설정
+
 
 ## 이미지 레시피의 역할
 
