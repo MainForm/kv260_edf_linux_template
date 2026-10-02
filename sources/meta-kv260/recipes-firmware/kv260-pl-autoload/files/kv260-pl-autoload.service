@@ -1,0 +1,18 @@
+[Unit]
+Description=Load KV260 PL bitstream and device tree overlay
+After=local-fs.target
+
+[Service]
+Type=oneshot
+
+ExecStartPre=/usr/bin/test -r /lib/firmware/xilinx/kv260-pl-firmware/kv260-pl-firmware.bin
+ExecStartPre=/usr/bin/test -r /lib/firmware/xilinx/kv260-pl-firmware/kv260-pl-firmware.dtbo
+
+ExecStart=/usr/bin/fpgautil \
+    -b /lib/firmware/xilinx/kv260-pl-firmware/kv260-pl-firmware.bin \
+    -o /lib/firmware/xilinx/kv260-pl-firmware/kv260-pl-firmware.dtbo
+
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
