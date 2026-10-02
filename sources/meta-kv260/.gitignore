@@ -1,0 +1,3 @@
+# Ignore Vitis project files
+**/.Xil/
+**/extracted/

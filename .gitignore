@@ -3,6 +3,7 @@
 
 # 외부 소스는 제외하고 자체 레이어만 추적
 /sources/*
+!/sources/meta-kv260
 
 /edf-init-build-env
 
