@@ -13,7 +13,7 @@ kv260_edf/
 ├── docker-compose.yaml     # 대화형 개발 및 일회성 빌드 서비스
 ├── init_edf.sh             # repo 초기화 및 고정 manifest로 소스 동기화
 ├── manifests/
-│   └── edf-pinned.xml       # 외부 저장소 경로와 커밋 고정
+│   └── edf-pinned.xml      # 외부 저장소 경로와 커밋 고정
 ├── sources/                # repo sync로 받는 외부 Yocto 레이어
 ├── edf-init-build-env      # 소스 동기화 시 복사되는 환경 초기화 스크립트
 └── build/                  # 환경 초기화 후 생성되는 빌드 디렉터리
@@ -21,16 +21,7 @@ kv260_edf/
 
 `build/`는 초기 저장소에 포함되어 있지 않으며, 아래 초기화 명령으로 생성합니다.
 
-## 고정 manifest의 역할
-
 [`manifests/edf-pinned.xml`](manifests/edf-pinned.xml)은 `repo` 도구가 사용할 저장소 목록입니다. `repo`는 여러 Git 저장소를 하나의 작업 디렉터리에서 동기화합니다.
-
-- `remote`: 외부 저장소를 가져올 주소입니다. 현재는 `https://github.com/Xilinx`입니다.
-- `project`: 저장소 이름과 `sources/` 아래 배치할 경로를 지정합니다.
-- `revision`: 사용할 정확한 Git 커밋을 고정합니다.
-- `upstream`: 해당 커밋이 속한 브랜치 정보를 제공합니다.
-- `copyfile`: `meta-amd-edf`의 초기화 스크립트를 루트의 `edf-init-build-env`로 복사합니다.
-
 브랜치가 업데이트되어도 이 manifest로 동기화하면 지정된 소스 커밋을 다시 가져올 수 있습니다. 다만 로컬 소스 수정, 빌드 설정, 호스트 환경까지 저장하는 파일은 아니므로, 이것만으로 동일한 빌드 결과 전체가 보장되지는 않습니다.
 
 ## 빌드 준비 (공통)
@@ -93,23 +84,17 @@ source ./edf-init-build-env build
 기본 템플릿의 `MACHINE`은 `qemuarm64`이므로 KV260 대상으로 변경해야 합니다. `build/conf/local.conf`에서 기존 `MACHINE` 설정을 다음으로 바꾸고, `DISTRO`도 확인합니다.
 
 ```bitbake
-MACHINE = "k26-smk-kv-sdt"
+MACHINE = "zynqmp-kv260-sdt-full"
 DISTRO = "amd-edf"
 ```
 
 환경이 초기화된 `build/` 디렉터리에서 실행하는 빌드 예시입니다.
 
 ```bash
-bitbake edf-linux-disk-image-kria
+bitbake kv260-image
 ```
 
-위 머신과 이미지 레시피는 현재 체크아웃된 `meta-kria` 및 `meta-amd-edf` 소스에서 확인했습니다. 이 프로젝트에서 실제 빌드 성공과 KV260 부팅까지 검증한 절차는 아닙니다.
-
-기본 `TMPDIR` 설정을 사용하는 경우 산출물 위치는 다음과 같습니다.
-
-```text
-build/tmp/deploy/images/k26-smk-kv-sdt/
-```
+`kv260-image`는 `meta-kv260` 레이어의 [recipes-core/images/kv260-image.bb](sources/meta-kv260/recipes-core/images/kv260-image.bb)에 정의한 커스텀 이미지입니다. EDF의 `edf-linux-disk-image.bb`를 기반으로 하며, PL 비트스트림과 디바이스 트리 오버레이를 제공하는 `kv260-pl-firmware`, PL 로딩 도구를 제공하는 `fpga-manager-script`를 추가로 포함합니다. 해당 레이어가 `build/conf/bblayers.conf`에 등록되어 있어야 합니다.
 
 ## Docker를 통한 개발
 
@@ -122,7 +107,7 @@ build/tmp/deploy/images/k26-smk-kv-sdt/
 | 서비스 | 용도 | 실행 방식 |
 | --- | --- | --- |
 | `edf-linux_dev` | Bash에 접속해 환경을 초기화하고, 레시피 수정 후 반복 빌드하는 대화형 개발 환경 | `docker compose up -d --build`로 시작하고 `docker compose exec edf-linux_dev bash`로 접속합니다. 빌드는 접속 후 직접 실행합니다. |
-| `edf-linux_build` | 준비된 설정으로 지정한 타깃을 빌드하고 종료하는 일회성 빌드 | `docker compose run --rm --build edf-linux_build`로 실행합니다. 기본 타깃은 `edf-linux-disk-image-kria`이며 `BITBAKE_TARGET`으로 변경할 수 있습니다. |
+| `edf-linux_build` | 준비된 설정으로 지정한 타깃을 빌드하고 종료하는 일회성 빌드 | `BITBAKE_TARGET=kv260-image docker compose run --rm --build edf-linux_build`로 실행합니다. Compose 기본 타깃은 `edf-linux-disk-image-kria`이므로 커스텀 이미지를 명시합니다. |
 
 `edf-linux_dev`는 프로필 없이 기본 실행됩니다. `edf-linux_build`는 선택적으로 실행할 서비스를 묶는 `build` 프로필에 속하므로 일반 `docker compose up`으로 시작되지 않습니다. `run` 명령에 서비스 이름을 직접 지정하면 별도 프로필 옵션 없이 실행됩니다.
 
@@ -152,24 +137,24 @@ source ./sources/poky/oe-init-build-env build
 초기화 후 현재 디렉터리는 `/home/amd-edf/edf/build`가 됩니다. 처음 실행하면 `conf/`에 설정 파일이 생성되며, 기존 설정 파일이 있으면 유지합니다. 호스트 편집기로 `build/conf/local.conf`를 열어 기존 `MACHINE`을 KV260 대상으로 변경하고 `DISTRO`를 확인합니다.
 
 ```bitbake
-MACHINE = "k26-smk-kv-sdt"
+MACHINE = "zynqmp-kv260-sdt-full"
 DISTRO = "amd-edf"
 ```
 
-호스트에서 `sources/` 아래 레이어나 레시피를 수정하면 컨테이너에도 바로 반영됩니다. 환경을 초기화한 컨테이너의 `build/` 디렉터리에서 빌드합니다.
+`sources/meta-kv260`이 `build/conf/bblayers.conf`에 등록되어 있어야 합니다. 호스트에서 `sources/` 아래 레이어나 레시피를 수정하면 컨테이너에도 바로 반영됩니다. 환경을 초기화한 컨테이너의 `build/` 디렉터리에서 빌드합니다.
 
 ```bash
-bitbake edf-linux-disk-image-kria
+bitbake kv260-image
 ```
 
-기본 `TMPDIR`을 사용하면 호스트의 `build/tmp/deploy/images/k26-smk-kv-sdt/`에서 산출물을 확인할 수 있습니다. 설정에 호스트 전용 절대 경로가 있다면 컨테이너에서도 접근 가능한 경로인지 확인합니다. 공유 디렉터리의 쓰기 권한 오류가 발생하면 호스트 디렉터리 소유권과 컨테이너 사용자(`id`)의 UID/GID를 확인합니다.
+기본 `TMPDIR`을 사용하면 호스트의 `build/tmp/deploy/images/zynqmp-kv260-sdt-full/`에서 산출물을 확인할 수 있습니다. 설정에 호스트 전용 절대 경로가 있다면 컨테이너에서도 접근 가능한 경로인지 확인합니다. 공유 디렉터리의 쓰기 권한 오류가 발생하면 호스트 디렉터리 소유권과 컨테이너 사용자(`id`)의 UID/GID를 확인합니다.
 
 ### 3. 일회성 빌드
 
 위 초기화와 KV260 설정을 마친 뒤, **호스트의 프로젝트 루트**에서 실행합니다.
 
 ```bash
-docker compose run --rm --build edf-linux_build
+BITBAKE_TARGET=kv260-image docker compose run --rm --build edf-linux_build
 ```
 
 `edf-linux_build`는 빌드 환경을 불러와 BitBake를 실행합니다. `--rm`으로 실행한 컨테이너는 종료 후 삭제되지만, 호스트의 설정, 빌드 캐시, 산출물은 유지됩니다.
