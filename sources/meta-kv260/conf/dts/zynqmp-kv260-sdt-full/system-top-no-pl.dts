@@ -4576,49 +4576,5 @@
                 psu_ddr_0_memory = "/memory@0";
                 psu_ddr_1_memory = "/memory@800000000";
                 psu_qspi_linear_0_memory = "/memory@c0000000";
-                cma_reserved_4B000000 = "/reserved-memory/cma_reserved@4B000000";
-        };
-
-        domains {
-
-                APU_Linux {
-                        compatible = "openamp,domain-v1";
-                        cpus = <&cpus_a53 0xf 0x80000003>;
-                        os,type = "linux";
-                        reserved-memory = <0x110>;
-                };
-
-                R5_0_FREERTOS {
-                        compatible = "openamp,domain-v1";
-                        cpus = <&cpus_r5_0 0x1 0x80000000>;
-                        os,type = "freertos";
-                        rpu_pd_val = <0x79 0x7>;
-                        cpu_config_str = "split";
-                        core_num = "0";
-                };
-
-                R5_1_BAREMETAL {
-                        compatible = "openamp,domain-v1";
-                        cpus = <&cpus_r5_1 0x2 0x80000003>;
-                        os,type = "baremetal";
-                        rpu_pd_val = <0x79 0x8>;
-                        cpu_config_str = "split";
-                        core_num = "1";
-                };
-        };
-
-        reserved-memory {
-                ranges;
-                #size-cells = <0x2>;
-                #address-cells = <0x2>;
-
-                cma_reserved_4B000000: cma_reserved@4B000000 {
-                        phandle = <0x110>;
-                        label = "cma_reserved_4B000000";
-                        compatible = "shared-dma-pool";
-                        reusable;
-                        linux,cma-default;
-                        reg = <0x0 0x4b000000 0x0 0x32000000>;
-                };
         };
 };

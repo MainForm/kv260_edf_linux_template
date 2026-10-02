@@ -13,11 +13,11 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 LAYER_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 MACHINE_NAME="zynqmp-kv260-sdt-full"
 SDT_DIR="${LAYER_DIR}/hw/sdt"
-TEMPLATE="${LAYER_DIR}/conf/machineyaml/kv260.yaml"
-WORK_DIR="${BUILDDIR}/gen-machine/${MACHINE_NAME}"
+# Separate from the previous template-based configuration cache.
+WORK_DIR="${BUILDDIR}/gen-machine/${MACHINE_NAME}-no-template"
 
-if [[ ! -s "${SDT_DIR}/system-top.dts" || ! -f "$TEMPLATE" ]]; then
-    echo "ERROR: hw/sdt/system-top.dts와 conf/machineyaml/kv260.yaml이 필요합니다." >&2
+if [[ ! -s "${SDT_DIR}/system-top.dts" ]]; then
+    echo "ERROR: hw/sdt/system-top.dts가 필요합니다." >&2
     exit 1
 fi
 
@@ -27,7 +27,6 @@ cd "$WORK_DIR"
 # Generate configuration in the layer and temporary files in build/.
 # Omit -l to leave local.conf unchanged.
 gen-machine-conf parse-sdt \
-    --template "$TEMPLATE" \
     --hw-description "$SDT_DIR" \
     --machine-name "$MACHINE_NAME" \
     -c "${LAYER_DIR}/conf" \
